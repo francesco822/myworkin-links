@@ -125,6 +125,34 @@
   .link.featured:hover { transform:translateY(-3px); }
   .badge-star { position:absolute; top:10px; right:12px; font-size:11px; font-family:var(--mono); letter-spacing:.6px; color:var(--accent-ink); }
 
+  /* Link héroe — plataforma nueva (máximo protagonismo) */
+  .link.hero {
+    grid-template-columns:56px 1fr auto; gap:16px; padding:20px 18px; margin-bottom:4px;
+    color:#fff; border:none;
+    background:linear-gradient(135deg, var(--accent), var(--accent-ink));
+    box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent), var(--shadow-h);
+    animation:heroGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes heroGlow {
+    0%,100% { box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent), 0 14px 34px color-mix(in srgb, var(--accent) 30%, transparent); }
+    50%     { box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 72%, transparent), 0 0 42px color-mix(in srgb, var(--accent) 55%, transparent), 0 14px 34px color-mix(in srgb, var(--accent) 40%, transparent); }
+  }
+  .link.hero::before { display:none; }
+  .link.hero::after {
+    content:""; position:absolute; top:0; left:-70%; width:45%; height:100%; pointer-events:none;
+    background:linear-gradient(100deg, transparent, rgba(255,255,255,.4), transparent);
+    transform:skewX(-18deg); animation:shine 3.8s ease-in-out infinite;
+  }
+  @keyframes shine { 0% { left:-70%; } 55%,100% { left:140%; } }
+  .link.hero .ic { width:56px; height:56px; border-radius:14px; background:rgba(255,255,255,.2); color:#fff; font-size:27px; }
+  .link.hero .l-title { font-size:19.5px; font-weight:800; letter-spacing:-.4px; }
+  .link.hero .l-sub { color:rgba(255,255,255,.85); white-space:normal; }
+  .link.hero .tag { background:rgba(255,255,255,.22); color:#fff; }
+  .link.hero .arrow { color:#fff; }
+  .link.hero:hover { transform:translateY(-4px) scale(1.015); box-shadow:0 0 0 2px rgba(255,255,255,.5), 0 0 50px color-mix(in srgb, var(--accent) 60%, transparent), var(--shadow-h); }
+  .link.hero:hover .arrow { color:#fff; transform:translateX(4px); }
+  .hero-badge { position:absolute; top:11px; right:13px; font-size:10px; font-weight:700; font-family:var(--mono); letter-spacing:1px; text-transform:uppercase; color:var(--accent-ink); background:#fff; padding:3px 9px; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,.18); }
+
   .ic { width:44px; height:44px; border-radius:11px; display:grid; place-items:center; background:var(--accent-tint); color:var(--accent-ink); font-size:22px; }
   .meta { min-width:0; display:flex; flex-direction:column; gap:3px; }
   .l-title { font-weight:700; font-size:15.5px; letter-spacing:-.2px; }
@@ -137,7 +165,7 @@
   footer { text-align:center; font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; color:var(--ink-soft); opacity:.8; margin-top:6px; }
   footer b { color:var(--accent-ink); font-weight:600; }
 
-  @media (prefers-reduced-motion: reduce) { .amb, .link.featured { animation:none; } *, *::before, *::after { transition-duration:.01ms !important; } }
+  @media (prefers-reduced-motion: reduce) { .amb, .link.featured, .link.hero, .link.hero::after { animation:none; } .link.hero::after { display:none; } *, *::before, *::after { transition-duration:.01ms !important; } }
 </style>
 </head>
 <body>
@@ -168,6 +196,17 @@
 
   <section class="links">
     <p class="eyebrow">Nuestros enlaces</p>
+
+    <a class="link hero" href="https://www.myworkin.ai/" target="_blank" rel="noopener">
+      <span class="hero-badge" aria-hidden="true">✨ Nuevo</span>
+      <span class="ic" aria-hidden="true">🚀</span>
+      <span class="meta">
+        <span class="tag">Plataforma oficial</span>
+        <span class="l-title">MyWorkIn.ai</span>
+        <span class="l-sub">Entra a nuestra nueva plataforma con IA</span>
+      </span>
+      <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
+    </a>
 
     <a class="link featured" href="https://api.whatsapp.com/send?phone=51984730890&text=Hola%20MyWorkIn!%F0%9F%91%8B%20Vengo%20de%20tus%20redes%2C%20me%20gustar%C3%ADa%20tener%20m%C3%A1s%20info%20del%20Entrenamiento%20de%20este%20s%C3%A1bado!%20" target="_blank" rel="noopener">
       <span class="badge-star" aria-hidden="true">🔥 Destacado</span>
