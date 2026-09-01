@@ -181,6 +181,37 @@
   .link:hover .arrow { color:var(--accent); transform:translateX(3px); }
   .arrow svg { width:18px; height:18px; display:block; }
 
+  /* ── Agenda / mini calendario ─────────────────────────── */
+  .ag-card { background:var(--paper-2); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:13px 11px 11px; }
+  .ag-head { display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:0 3px 10px; }
+  .ag-mes { font-family:var(--mono); font-size:11px; letter-spacing:1.6px; text-transform:uppercase; color:var(--accent-ink); font-weight:600; }
+  .ag-hint { font-family:var(--mono); font-size:9.5px; letter-spacing:.6px; color:var(--ink-soft); }
+  .ag-grid { display:grid; gap:5px; }
+  .ag-day {
+    position:relative; min-height:88px; border:1px solid var(--line-2); border-radius:11px; padding:6px 4px 5px;
+    display:flex; flex-direction:column; gap:4px; background:color-mix(in srgb, var(--paper) 40%, var(--paper-2));
+  }
+  .ag-dow { font-family:var(--mono); font-size:8.5px; letter-spacing:.7px; text-transform:uppercase; color:var(--ink-soft); text-align:center; }
+  .ag-num { font-size:16px; font-weight:800; line-height:1; text-align:center; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .ag-day.is-today {
+    border-color:var(--accent); background:color-mix(in srgb, var(--accent) 13%, var(--paper-2));
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--accent) 50%, transparent) inset;
+  }
+  .ag-day.is-today .ag-num, .ag-day.is-today .ag-dow { color:var(--accent); }
+  .ag-day.has-ev { border-color:color-mix(in srgb, var(--accent) 30%, var(--line)); }
+  .ag-ev {
+    display:block; margin-top:auto; text-decoration:none; font-size:9px; line-height:1.2; font-weight:700; color:var(--ink);
+    background:var(--accent-tint); border-left:3px solid var(--accent); border-radius:4px; padding:4px 3px 4px 4px;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap; transition:background .18s ease, transform .18s ease;
+  }
+  .ag-ev:hover { background:color-mix(in srgb, var(--accent) 32%, var(--paper-2)); transform:translateY(-1px); }
+  .ag-ev:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .ag-empty { text-align:center; font-size:12.5px; color:var(--ink-soft); padding:6px 4px 2px; }
+  .ag-list { display:flex; flex-direction:column; gap:12px; }
+  .ic-date { display:flex !important; flex-direction:column; align-items:center; justify-content:center; line-height:1; }
+  .ic-date .d { font-size:17px; font-weight:800; }
+  .ic-date .m { font-family:var(--mono); font-size:8px; letter-spacing:1px; text-transform:uppercase; margin-top:3px; opacity:.85; }
+
   footer { text-align:center; font-family:var(--mono); font-size:10.5px; letter-spacing:.5px; color:var(--ink-soft); opacity:.8; margin-top:6px; }
   footer b { color:var(--accent-ink); font-weight:600; }
 
@@ -214,7 +245,7 @@
   </section>
 
   <section class="links">
-    <p class="eyebrow">Nuestros enlaces</p>
+    <p class="eyebrow">La plataforma</p>
 
     <a class="link hero" href="https://www.myworkin.ai/" target="_blank" rel="noopener">
       <span class="hero-badge" aria-hidden="true">✨ Nuevo</span>
@@ -227,16 +258,20 @@
       <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
     </a>
 
-    <a class="link featured" href="https://www.myworkin.ai/webinars/fw4uqu2H1whMw6Pmx9xE" target="_blank" rel="noopener">
-      <span class="badge-star" aria-hidden="true">🔥 Destacado</span>
-      <span class="ic" aria-hidden="true">🧠</span>
-      <span class="meta">
-        <span class="tag">Masterclass en vivo</span>
-        <span class="l-title">Claude e IA para el Trabajo</span>
-        <span class="l-sub">Domingo 16 de agosto · 9:00 a. m. – 1:00 p. m.</span>
-      </span>
-      <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg></span>
-    </a>
+    <p class="eyebrow">Próximos eventos</p>
+
+    <div class="ag-card">
+      <div class="ag-head">
+        <span class="ag-mes" id="agMes"></span>
+        <span class="ag-hint">Hora de Perú</span>
+      </div>
+      <div class="ag-grid" id="agGrid"></div>
+      <p class="ag-empty" id="agEmpty" hidden>Sin eventos programados esta semana.</p>
+    </div>
+
+    <div class="ag-list" id="agList"></div>
+
+    <p class="eyebrow">Nuestros enlaces</p>
 
     <!-- OCULTO: Webinar "Construye herramientas con IA" (jul/ago 2026)
     <a class="link featured" href="https://www.myworkin.ai/webinars/79sciiWvFvoxwcNDaqRj" target="_blank" rel="noopener">
@@ -300,6 +335,151 @@
 
   <footer>Hecho con — por <b>Claude</b></footer>
 </main>
+
+<script>
+(function () {
+  /* Masterclass semanal: todos los domingos, 9:00 a. m.
+     El calendario la genera sola, no hay que tocar fechas. Lo único que se
+     actualiza aquí es el enlace del webinar de cada domingo en URLS; el
+     domingo que no tenga enlace propio manda a la lista de webinars. */
+  var MASTERCLASS = {
+    hora:   '9:00 a. m. – 1:00 p. m.',
+    corto:  'Claude e IA para el Trabajo',
+    titulo: 'Claude e IA para el Trabajo',
+    tag:    'Masterclass · Pagado',
+    urls: {
+      '2026-09-06': 'https://www.myworkin.ai/webinars/dEBNaV4xdiW1Bonllyom'
+    },
+    urlBase: 'https://www.myworkin.ai/webinars'
+  };
+
+  /* Eventos sueltos que no caen domingo. Agregar/quitar filas aquí. */
+  var EVENTOS_EXTRA = [];
+
+  var SEMANAS  = 8;   /* cuántos domingos se generan hacia adelante */
+  var EN_LISTA = 2;   /* cuántos eventos se muestran como link abajo */
+  var EVENTOS;
+
+  var DOW  = ['dom','lun','mar','mié','jue','vie','sáb'];
+  var MES  = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var MESL = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  var DIA  = 86400000;
+
+  function hoyISO() {
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date());
+    } catch (e) {
+      var d = new Date(), z = function (n) { return (n < 10 ? '0' : '') + n; };
+      return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate());
+    }
+  }
+  function aMs(iso) { var p = iso.split('-'); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function aISO(ms) { return new Date(ms).toISOString().slice(0, 10); }
+  function esc(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  var grid  = document.getElementById('agGrid');
+  var lista = document.getElementById('agList');
+  var mesEl = document.getElementById('agMes');
+  var vacio = document.getElementById('agEmpty');
+  if (!grid) return;
+
+  var hoy = hoyISO();
+
+  EVENTOS = EVENTOS_EXTRA.slice();
+  (function () {
+    /* próximo domingo, o hoy mismo si hoy es domingo */
+    var ms = aMs(hoy) + ((7 - new Date(aMs(hoy)).getUTCDay()) % 7) * DIA;
+    for (var s = 0; s < SEMANAS; s++, ms += 7 * DIA) {
+      var iso = aISO(ms);
+      EVENTOS.push({
+        fecha:  iso,
+        hora:   MASTERCLASS.hora,
+        corto:  MASTERCLASS.corto,
+        titulo: MASTERCLASS.titulo,
+        tag:    MASTERCLASS.tag,
+        url:    MASTERCLASS.urls[iso] || MASTERCLASS.urlBase
+      });
+    }
+  })();
+  var proximos = EVENTOS.filter(function (e) { return e.fecha >= hoy; })
+                        .sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
+
+  /* La tira va de hoy hasta el último evento de la semana (mínimo 4 días, máximo 7). */
+  var enTira = proximos.filter(function (e) { return aMs(e.fecha) - aMs(hoy) < 7 * DIA; });
+  var celdas = 5;
+  if (enTira.length) {
+    celdas = Math.round((aMs(enTira[enTira.length - 1].fecha) - aMs(hoy)) / DIA) + 1;
+  }
+  celdas = Math.min(7, Math.max(4, celdas));
+
+  var inicioMs = aMs(hoy);
+  var finMs    = inicioMs + (celdas - 1) * DIA;
+  var mi = new Date(inicioMs).getUTCMonth(), mf = new Date(finMs).getUTCMonth();
+  mesEl.textContent = (mi === mf ? MESL[mi] : MES[mi] + ' – ' + MES[mf]) + ' ' + new Date(finMs).getUTCFullYear();
+
+  grid.style.gridTemplateColumns = 'repeat(' + celdas + ', minmax(0, 1fr))';
+
+  for (var i = 0; i < celdas; i++) {
+    var ms  = inicioMs + i * DIA;
+    var iso = aISO(ms);
+    var d   = new Date(ms);
+
+    var celda = document.createElement('div');
+    celda.className = 'ag-day' + (iso === hoy ? ' is-today' : '');
+
+    var dow = document.createElement('span');
+    dow.className = 'ag-dow';
+    dow.textContent = DOW[d.getUTCDay()];
+    celda.appendChild(dow);
+
+    var num = document.createElement('span');
+    num.className = 'ag-num';
+    num.textContent = d.getUTCDate();
+    celda.appendChild(num);
+
+    EVENTOS.filter(function (e) { return e.fecha === iso; }).forEach(function (e) {
+      celda.classList.add('has-ev');
+      var chip = document.createElement('a');
+      chip.className = 'ag-ev';
+      chip.href = e.url;
+      chip.target = '_blank';
+      chip.rel = 'noopener';
+      chip.title = e.titulo;
+      chip.textContent = e.corto;
+      celda.appendChild(chip);
+    });
+
+    grid.appendChild(celda);
+  }
+
+  if (!proximos.length) { vacio.hidden = false; return; }
+
+  var FLECHA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M17 7H8M17 7v9"/></svg>';
+
+  proximos.slice(0, EN_LISTA).forEach(function (e, idx) {
+    var d = new Date(aMs(e.fecha));
+    var a = document.createElement('a');
+    a.className = 'link' + (idx === 0 ? ' featured' : '');
+    a.href = e.url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.innerHTML =
+      (idx === 0 ? '<span class="badge-star" aria-hidden="true">🔥 Próximo</span>' : '') +
+      '<span class="ic ic-date" aria-hidden="true"><span class="d">' + d.getUTCDate() +
+        '</span><span class="m">' + MES[d.getUTCMonth()] + '</span></span>' +
+      '<span class="meta">' +
+        '<span class="tag">' + esc(e.tag) + '</span>' +
+        '<span class="l-title">' + esc(e.titulo) + '</span>' +
+        '<span class="l-sub">' + DOW[d.getUTCDay()] + ' ' + d.getUTCDate() + ' ' + MES[d.getUTCMonth()] +
+          ' · ' + esc(e.hora) + '</span>' +
+      '</span>' +
+      '<span class="arrow" aria-hidden="true">' + FLECHA + '</span>';
+    lista.appendChild(a);
+  });
+})();
+</script>
 
 </body>
 </html>
