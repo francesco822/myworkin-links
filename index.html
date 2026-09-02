@@ -353,6 +353,10 @@
     urlBase: 'https://www.myworkin.ai/webinars'
   };
 
+  /* Primera fecha que todavía NO se anuncia: ese domingo y los siguientes no
+     salen en la agenda. Dejar '' para publicar todos los domingos. */
+  var NO_PUBLICAR_DESDE = '2026-09-13';
+
   /* Eventos sueltos que no caen domingo. Agregar/quitar filas aquí. */
   var EVENTOS_EXTRA = [];
 
@@ -393,6 +397,7 @@
     var ms = aMs(hoy) + ((7 - new Date(aMs(hoy)).getUTCDay()) % 7) * DIA;
     for (var s = 0; s < SEMANAS; s++, ms += 7 * DIA) {
       var iso = aISO(ms);
+      if (NO_PUBLICAR_DESDE && iso >= NO_PUBLICAR_DESDE) break;
       EVENTOS.push({
         fecha:  iso,
         hora:   MASTERCLASS.hora,
